@@ -1,4 +1,6 @@
 
+// @deno-types="https://deno.land/x/deno@v1.43.6/types.md"
+
 // 打开 Deno KV（全局只需打开一次）
 const kv = await Deno.openKv();
 // 使用一个固定的 key 来存储目标 URL
@@ -20,8 +22,8 @@ Deno.serve(async (req) => {
     return new Response(`代理目标 URL 已更新为：${newTargetUrl}`);
   }
 
-  // 仅处理路径以 /proxy 开头的请求
-  if (url.pathname.startsWith("/proxy")) {
+  // 处理所有路径请求
+  {
     // 从 KV 中获取目标 URL
     const result = await kv.get(TARGET_KEY);
     if (!result.value) {
@@ -32,8 +34,8 @@ Deno.serve(async (req) => {
     }
     const baseUrl = result.value as string;
 
-    // 去掉 /proxy 前缀，剩余部分作为相对路径
-    const proxyPath = url.pathname.slice("/proxy".length);
+    // 使用完整路径作为相对路径
+    const proxyPath = url.pathname;
     // 构造最终的请求 URL：以存储的 baseUrl 为基准，加上剩余路径和原有查询参数（注意：此处不包括 setUrl 参数，因为已单独处理）
     let finalUrl: string;
     try {
